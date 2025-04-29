@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GoAML Show Person</title>
+    <!-- Add Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            margin: 10px;
+            border: 1px solid #ddd;
+            
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #ddd;
+            margin-top:30px;
+        }
+
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            margin-left: 10px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 0;
+        }
+
+        .action-icons {
+            display: flex;
+            gap: 13px;
+            padding-left: 5px;
+            margin-top: 5px;
+        }
+
+        .action-icons i {
+            color: #666;
+            cursor: pointer;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .action-icons i:hover {
+            color: #333;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 15px;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            position: relative;
+        }
+
+        th:first-child,
+        td:first-child {
+            width: 5%;
+        }
+
+        th:not(:first-child),
+        td:not(:first-child) {
+            width: 22.5%;
+        }
+
+        th {
+            position: relative;
+        }
+
+        th::after {
+            content: "⋮";
+            position: absolute;
+            right: 23px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .pencil-icon {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        tbody {
+            height: 150px;
+
+            .no-records {
+                padding: 10px;
+                color: #666;
+                font-style: italic;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <hr>
+        <div class="header-container">
+            <h1>GoAML Show Person</h1>
+            <div class="action-icons">
+                <i class="fas fa-search" title="Search"></i>
+                <i class="fas fa-plus" title="Add"></i>
+                <i class="fas fa-edit" title="Edit"></i>
+                <i class="fas fa-trash-alt" title="Delete"></i>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>&emsp;</th>
+                    <th>Name</th>
+                    <th>Cif</th>
+                    <th>Birthdate</th>
+                    <th>Nationality<i class="fa-solid fa-pencil pencil-icon"></i></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="5" class="no-records">No records are available.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
