@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>GoAML Show Person</title>
     <!-- Add Font Awesome CSS -->
@@ -14,7 +13,6 @@
         .container {
             margin: 10px;
             border: 1px solid #ddd;
-            
         }
 
         hr {
@@ -107,13 +105,57 @@
 
         tbody {
             height: 150px;
+        }
 
-            .no-records {
-                padding: 10px;
-                color: #666;
-                font-style: italic;
-                text-align: center;
-            }
+        .no-records {
+            padding: 10px;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .table-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 0 10px;
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .page-size-selector select {
+            padding: 3px 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pagination i {
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .pagination i:hover {
+            color: #333;
+        }
+
+        .page-info {
+            font-size: 14px;
+            color: #666;
+            margin: 0 5px;
         }
     </style>
 </head>
@@ -147,7 +189,29 @@
                 </tr>
             </tbody>
         </table>
+
+        <div class="table-footer">
+
+            <div class="pagination">
+                <i class="fa-solid fa-left-long" title="First page"></i>
+                <i class="fa-solid fa-left-long" title="Previous page"></i>
+                
+                <i class="fa-solid fa-right-long" title="Next page"></i>
+                <i class="fa-solid fa-right-long" title="Last page"></i>
+                <span class="page-info">Page 1 of 1</span>
+            </div> 
+
+            <div class="page-size-selector">
+                Page size:
+                <select>
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                    <option>100</option>
+                </select>
+            </div>
+            
+        </div>
     </div>
 </body>
-
 </html>
