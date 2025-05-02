@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GoAML Show Person</title>
-    <!-- Add Font Awesome CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,7 +22,7 @@
             border: 0;
             height: 1px;
             background-color: #ddd;
-            margin-top:30px;
+            margin-top: 30px;
         }
 
         .header-container {
@@ -30,8 +33,9 @@
         }
 
         h1 {
-            color: #333;
-            font-size: 20px;
+            font-family: 'Poppins', sans-serif;
+            color: #80A8D0;
+            font-size: 22px;
             margin-bottom: 0;
         }
 
@@ -42,21 +46,14 @@
             margin-top: 5px;
         }
 
-        .action-icons i {
-            color: #666;
-            cursor: pointer;
-            font-size: 13px;
-            transition: color 0.3s;
-        }
-
-        .action-icons i:hover {
-            color: #333;
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 15px;
         }
 
         table {
+            min-width: 100%;
             border-collapse: collapse;
-            width: 100%;
-            margin-top: 15px;
             table-layout: fixed;
         }
 
@@ -71,40 +68,117 @@
         th:first-child,
         td:first-child {
             width: 5%;
+            min-width: 40px;
         }
 
         th:not(:first-child),
         td:not(:first-child) {
-            width: 22.5%;
+            min-width: 100px;
         }
 
         th {
             position: relative;
+            background-color: #f9f9f9;
         }
 
-        th::after {
+        .th-dots {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            user-select: none;
+            z-index: 1;
+            background: none;
+            border: none;
+            padding: 0;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .th-dots:hover {
+            background-color: #f0f0f0;
+        }
+
+        .th-dots::after {
             content: "⋮";
-            position: absolute;
-            right: 23px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .pencil-icon {
-            position: absolute;
-            right: 4px;
-            top: 50%;
-            transform: translateY(-50%);
+            font-size: 18px;
             color: #666;
-            cursor: pointer;
-            font-size: 14px;
+            line-height: 1;
+            display: block;
         }
 
-        tbody {
-            height: 150px;
+        .th-dropdown {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            min-width: 70px;
+            display: none;
+            margin-top: 5px;
+            border-radius: 0;
+            padding: 0;
+        }
+
+        .th-dropdown ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .th-dropdown li {
+            padding: 8px 12px;
+            cursor: default;
+            font-size: 13px;
+            color: #444;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+            border-bottom: 1px solid #eee;
+        }
+
+        .th-dropdown li:last-child {
+            border-bottom: none;
+        }
+
+        .th-dropdown li:hover {
+            background-color: #f5f5f5;
+            cursor: default;
+        }
+
+        .nested-dropdown li {
+            cursor: default;
+        }
+
+        .th-dropdown li .arrow {
+            float: right;
+            margin-left: 15px;
+            color: #999;
+        }
+
+        .resize-handle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: transparent;
+            cursor: col-resize;
+            z-index: 1;
+        }
+
+        .resize-handle:hover {
+            background-color: #80A8D0;
+        }
+
+        .dragging {
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .no-records {
@@ -142,20 +216,276 @@
             gap: 10px;
         }
 
-        .pagination i {
+        .action-icons svg {
+            width: 18px;
+            height: 18px;
             color: #666;
             cursor: pointer;
-            font-size: 14px;
+            transition: color 0.3s;
         }
 
-        .pagination i:hover {
+        .action-icons svg:hover {
+            color: #000;
+        }
+
+        /* Filter menu styles */
+        .filter-menu {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            width: 300px;
+            display: none;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .filter-menu-header {
+            font-weight: bold;
+            margin-bottom: 10px;
             color: #333;
         }
 
-        .page-info {
-            font-size: 14px;
-            color: #666;
-            margin: 0 5px;
+        .filter-condition {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        .filter-select.logic-operator {
+            width: 80px;
+            min-width: 80px;
+        }
+
+        .filter-input {
+            width: calc(100% - 2px);
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+            margin-top: 0;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .filter-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .filter-btn {
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .filter-clear {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+        }
+
+        .filter-apply {
+            background: #80A8D0;
+            color: white;
+            border: 1px solid #5c8ab8;
+        }
+
+        .nested-dropdown.sort-submenu {
+            width: 140px;
+            min-width: 140px;
+        }
+
+        /* Sort menu styles */
+        .sort-menu {
+            padding: 0;
+            width: 200px;
+        }
+
+        .sort-btn {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #444;
+            transition: all 0.2s;
+        }
+
+        .sort-btn:last-child {
+            border-bottom: none;
+        }
+
+        .sort-btn:hover {
+            background-color: #f5f5f5;
+        }
+
+        .sort-btn.active {
+            background-color: #80A8D0;
+            color: white;
+        }
+
+        /* Nested dropdown styles */
+        .nested-dropdown {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            width: 250px;
+            display: none;
+            padding: 0;
+            left: 100%;
+            top: 0;
+        }
+
+        .has-nested {
+            position: relative;
+        }
+
+        .has-nested:hover .nested-dropdown {
+            display: block;
+        }
+
+        .th-dropdown.show {
+            display: block;
+        }
+
+        /* Row selection styles */
+        tr {
+            cursor: pointer;
+        }
+
+        tr.selected {
+            background-color: #e6f2ff;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 900px;
+            border: 1px solid #0178d0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .pop-up-contents {
+            border: 1px solid #ddd;
+            margin: 50px;
+            padding: 3px;
+        }
+
+        .informations {
+            border: 1px solid #ddd;
+            margin: 20px;
+            padding: 17px;
+        }
+
+        .modal-header {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-radius: 10px 10px 0 0;
+            color: white;
+            height: 50px;
+            text-align: center;
+            align-content: center;
+            background-color: #0178d0;
+        }
+        .scroll-part{
+         overflow-y: scroll;
+            height: 400px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            width: 35%;
+            margin-left: 50px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin:20px 50px 20px 0;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+        }
+
+        .btn-save {
+            background-color: #80A8D0;
+            color: white;
+            border: 1px solid #5c8ab8;
+        }
+
+        .section-header {
+            font-weight: bold;
+            margin: 0 0 25px 0;
+            color: #80A8D0;
         }
     </style>
 </head>
@@ -166,52 +496,441 @@
         <div class="header-container">
             <h1>GoAML Show Person</h1>
             <div class="action-icons">
-                <i class="fas fa-search" title="Search"></i>
-                <i class="fas fa-plus" title="Add"></i>
-                <i class="fas fa-edit" title="Edit"></i>
-                <i class="fas fa-trash-alt" title="Delete"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2" title="Search">
+                    <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+                    <path d="M21 21l-6 -6"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2" title="Add">
+                    <path d="M12 5l0 14"></path>
+                    <path d="M5 12l14 0"></path>
+                </svg>
+                <svg id="edit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" title="Edit">
+                    <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path>
+                    <path d="M13.5 6.5l4 4"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2" title="Delete">
+                    <path d="M4 7l16 0"></path>
+                    <path d="M10 11l0 6"></path>
+                    <path d="M14 11l0 6"></path>
+                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
+                </svg>
             </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>&emsp;</th>
-                    <th>Name</th>
-                    <th>Cif</th>
-                    <th>Birthdate</th>
-                    <th>Nationality<i class="fa-solid fa-pencil pencil-icon"></i></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="5" class="no-records">No records are available.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>&emsp;</th>
+                        <th>Name <button class="th-dots" aria-label="Column options"></button></th>
+                        <th>Cif <button class="th-dots" aria-label="Column options"></button></th>
+                        <th>Birthdate <button class="th-dots" aria-label="Column options"></button></th>
+                        <th>Nationality <button class="th-dots" aria-label="Column options"></button></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-id="1">
+                        <td><input type="checkbox"></td>
+                        <td>John Doe</td>
+                        <td>True</td>
+                        <td>1985-05-15</td>
+                        <td>USA</td>
+                    </tr>
+                    <tr data-id="2">
+                        <td><input type="checkbox"></td>
+                        <td>Jane Smith</td>
+                        <td>False</td>
+                        <td>1990-11-22</td>
+                        <td>Canada</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <div class="table-footer">
-
             <div class="pagination">
-                <i class="fa-solid fa-left-long" title="First page"></i>
-                <i class="fa-solid fa-left-long" title="Previous page"></i>
-                
-                <i class="fa-solid fa-right-long" title="Next page"></i>
-                <i class="fa-solid fa-right-long" title="Last page"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2"
+                    title="First page">
+                    <path d="M10 12l10 0"></path>
+                    <path d="M10 12l4 4"></path>
+                    <path d="M10 12l4 -4"></path>
+                    <path d="M4 4l0 16"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2"
+                    title="Previous page">
+                    <path d="M5 12l14 0"></path>
+                    <path d="M5 12l4 4"></path>
+                    <path d="M5 12l4 -4"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2"
+                    title="Next page">
+                    <path d="M5 12l14 0"></path>
+                    <path d="M15 16l4 -4"></path>
+                    <path d="M15 8l4 4"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2"
+                    title="Last page">
+                    <path d="M14 12l-10 0"></path>
+                    <path d="M14 12l-4 4"></path>
+                    <path d="M14 12l-4 -4"></path>
+                    <path d="M20 4l0 16"></path>
+                </svg>
                 <span class="page-info">Page 1 of 1</span>
-            </div> 
+            </div>
 
             <div class="page-size-selector">
                 Page size:
                 <select>
-                    <option>10</option>
-                    <option>25</option>
-                    <option>50</option>
-                    <option>100</option>
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
                 </select>
             </div>
-            
         </div>
     </div>
+
+    <!-- Edit Person Modal -->
+    <div id="editModal" class="modal">
+
+        <div class="modal-content">
+            <div class="modal-header">Edit Person</div>
+            <div class="scroll-part">
+                <div class="form-group">
+                    <label for="partyNumber" class="required-field">Party Number</label>
+                    <input type="text" id="partyNumber" value="123456">
+                </div>
+                <div class="form-group">
+                    <label for="myClient" class="required-field">My Client</label>
+                    <select id="myClient">
+                        <option>True</option>
+                        <option>False</option>
+                    </select>
+                </div>
+                <div class="pop-up-contents">
+                    <div class="informations">
+
+                        <div class="section-header">Personal Information</div>
+
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label for="title">Title</label>
+                                <select id="title">
+                                    <option>Mr.</option>
+                                    <option>Mrs.</option>
+                                    <option>Ms.</option>
+                                    <option>Dr.</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <label for="idNumber">ID Number</label>
+                                <input type="text" id="idNumber" value="ID78901234">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label for="partyName" class="required-field">Party Name</label>
+                                <input type="text" id="partyName" value="John Doe">
+                            </div>
+                            <div class="form-col">
+                                <label for="gender">Gender</label>
+                                <select id="gender">
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label for="firstName" class="required-field">First Name</label>
+                                <input type="text" id="firstName" value="John">
+                            </div>
+                            <div class="form-col">
+                                <label for="birthDate">Birth Date</label>
+                                <input type="date" id="birthDate" value="1985-05-15">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-save" id="saveEdit">Save</button>
+                <button class="btn btn-cancel" id="cancelEdit">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Column resizing functionality
+            const createResizableTableHead = () => {
+                const table = document.querySelector('table');
+                const headers = table.querySelectorAll('th:not(:first-child)');
+
+                headers.forEach(header => {
+                    const handle = document.createElement('div');
+                    handle.className = 'resize-handle';
+                    header.appendChild(handle);
+
+                    let isResizing = false;
+                    let startX;
+                    let startWidth;
+
+                    handle.addEventListener('mousedown', (e) => {
+                        isResizing = true;
+                        startX = e.clientX;
+                        startWidth = header.offsetWidth;
+                        document.body.classList.add('dragging');
+
+                        document.addEventListener('mousemove', onMouseMove);
+                        document.addEventListener('mouseup', () => {
+                            isResizing = false;
+                            document.body.classList.remove('dragging');
+                            document.removeEventListener('mousemove', onMouseMove);
+                        }, { once: true });
+                    });
+
+                    function onMouseMove(e) {
+                        if (!isResizing) return;
+                        const dx = e.clientX - startX;
+                        header.style.width = `${Math.max(startWidth + dx, 100)}px`;
+                    }
+                });
+            };
+
+            // Create filter menu template
+            const createFilterMenu = () => {
+                return `
+        <div class="filter-menu-header">Show items with value that:</div>
+        <div class="filter-condition">
+          <select class="filter-select">
+            <option>Is equal to</option>
+            <option>Is not equal to</option>
+          </select>
+          <input type="text" class="filter-input">
+          <select class="filter-select logic-operator">
+            <option>And</option>
+            <option>Or</option>
+          </select>
+          <select class="filter-select">
+            <option>Is equal to</option>
+            <option>Is not equal to</option>
+          </select>
+          <input type="text" class="filter-input">
+        </div>
+        <div class="filter-actions">
+          <div class="filter-btn filter-apply">Filter</div>
+          <div class="filter-btn filter-clear">Clear</div>
+        </div>
+      `;
+            };
+
+            // Create nationality filter menu template
+            const createNationalityFilterMenu = () => {
+                return `
+        <div class="filter-menu-header">Show items with value that:</div>
+        <div class="filter-condition">
+          <select class="filter-select">
+            <option>Is equal to</option>
+            <option>Is not equal to</option>
+            <option>Contains</option>
+            <option>Does not contain</option>
+          </select>
+          <input type="text" class="filter-input" placeholder="Enter value" value="Egypt">
+        </div>
+        <div class="filter-add-condition">And</div>
+        <div class="filter-condition">
+          <select class="filter-select">
+            <option>Is equal to</option>
+            <option>Is not equal to</option>
+            <option>Contains</option>
+            <option>Does not contain</option>
+          </select>
+          <input type="text" class="filter-input" placeholder="Enter value">
+        </div>
+        <div class="filter-actions">
+          <div class="filter-btn filter-apply">Apply</div>
+          <div class="filter-btn filter-clear">Clear</div>
+        </div>
+      `;
+            };
+
+            // Create sort menu template with text buttons
+            const createSortMenu = () => {
+                return `
+          <div class="sort-menu">
+            <div class="sort-btn" data-sort="asc">Add to sort (ascending)</div>
+            <div class="sort-btn" data-sort="desc">Add to sort (descending)</div>
+            <div class="sort-btn" data-sort="custom">Sort (ascending)</div>
+            <div class="sort-btn" data-sort="clear">Sort (descending)</div>
+          </div>
+      `;
+            };
+
+            // Dropdown functionality
+            const dropdown = document.createElement('div');
+            dropdown.className = 'th-dropdown';
+            document.body.appendChild(dropdown);
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.th-dots') && !e.target.closest('.th-dropdown')) {
+                    dropdown.classList.remove('show');
+                }
+            });
+
+            document.querySelectorAll('.th-dots').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const header = this.parentElement;
+                    const rect = header.getBoundingClientRect();
+                    const headerText = header.textContent.trim();
+
+                    dropdown.innerHTML = `
+          <ul>
+            <li class="has-nested">Filter<span class="arrow">></span>
+              <div class="nested-dropdown">
+                ${headerText === 'Nationality' ? createNationalityFilterMenu() : createFilterMenu()}
+              </div>
+            </li>
+            <li class="has-nested">Sort<span class="arrow">></span>
+              <div class="nested-dropdown">
+                ${createSortMenu()}
+              </div>
+            </li>
+          </ul>
+        `;
+
+                    // Smart positioning
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    if (spaceBelow > 150) {
+                        dropdown.style.top = `${rect.bottom + window.scrollY + 2}px`;
+                    } else {
+                        dropdown.style.top = `${rect.top + window.scrollY - dropdown.offsetHeight - 2}px`;
+                    }
+                    dropdown.style.left = `${rect.right - 100}px`;
+
+                    // Show dropdown
+                    dropdown.classList.add('show');
+                });
+            });
+
+            // Handle sort button clicks
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('.sort-btn')) {
+                    const sortBtn = e.target.closest('.sort-btn');
+                    const sortType = sortBtn.dataset.sort;
+
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.sort-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+
+                    // Add active class to clicked button (except for clear)
+                    if (sortType !== 'clear') {
+                        sortBtn.classList.add('active');
+                    }
+
+                    // Handle the sort action
+                    switch (sortType) {
+                        case 'asc':
+                            console.log('Sorting A to Z');
+                            // sortTable(columnName, 'asc');
+                            break;
+                        case 'desc':
+                            console.log('Sorting Z to A');
+                            // sortTable(columnName, 'desc');
+                            break;
+                        case 'custom':
+                            console.log('Custom sort');
+                            // showCustomSortDialog();
+                            break;
+                        case 'clear':
+                            console.log('Clearing sort');
+                            // clearSort();
+                            break;
+                    }
+                }
+            });
+
+            // Row selection functionality
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('click', function (e) {
+                    // Don't select if clicking on checkbox directly
+                    if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
+                        return;
+                    }
+
+                    // Toggle selection
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+
+                    // Update row styling
+                    if (checkbox.checked) {
+                        this.classList.add('selected');
+                    } else {
+                        this.classList.remove('selected');
+                    }
+                });
+            });
+
+            // Edit functionality
+            const editIcon = document.getElementById('edit-icon');
+            const editModal = document.getElementById('editModal');
+            const cancelEdit = document.getElementById('cancelEdit');
+            const saveEdit = document.getElementById('saveEdit');
+
+            editIcon.addEventListener('click', function () {
+                const selectedRow = document.querySelector('tr.selected');
+                if (!selectedRow) {
+                    alert('Please select a row to edit');
+                    return;
+                }
+
+                // Here you would populate the modal with the selected row's data
+                // For now we're just showing the modal with dummy data
+                editModal.style.display = 'flex';
+            });
+
+            cancelEdit.addEventListener('click', function () {
+                editModal.style.display = 'none';
+            });
+
+            saveEdit.addEventListener('click', function () {
+                // Here you would save the edited data
+                alert('Changes saved!');
+                editModal.style.display = 'none';
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function (e) {
+                if (e.target === editModal) {
+                    editModal.style.display = 'none';
+                }
+            });
+
+            // Initialize features
+            createResizableTableHead();
+        });
+
+        function sortTable(columnName, sortDirection) {
+            console.log(`Sorting ${columnName} ${sortDirection === 'asc' ? 'ascending' : 'descending'}`);
+            // Actual sorting implementation would go here
+        }
+    </script>
 </body>
+
 </html>
