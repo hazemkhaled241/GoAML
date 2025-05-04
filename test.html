@@ -387,14 +387,32 @@
             z-index: 2000;
             justify-content: center;
             align-items: center;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
         }
 
         .modal-content {
             background-color: white;
             border-radius: 10px;
             width: 900px;
+            height: auto;
+            max-height: 90vh;
             border: 1px solid #0178d0;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            transition: 
+                width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform, width, height;
+        }
+
+        .modal-content.maximized {
+            width: 95% !important;
+            height: 95vh !important;
+            max-width: none;
+            max-height: none;
         }
 
         .pop-up-contents {
@@ -415,10 +433,10 @@
             margin-bottom: 20px;
             border-radius: 10px 10px 0 0;
             color: white;
-            height: 50px;
+            height: 40px;
             text-align: center;
             align-content: center;
-            background-color: #0178d0;
+            background-color: #007dc3;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -436,6 +454,7 @@
             gap: 13px;
             position: absolute;
             right: 20px;
+            transition: transform 0.3s ease;
         }
 
         .modal-control {
@@ -447,16 +466,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform 0.2s ease;
         }
 
         .modal-control:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
+            transform: scale(1.1);
         }
 
         .scroll-part {
-            overflow-y: scroll;
-            height: 400px;
+            overflow-y: auto;
+            flex-grow: 1;
+            max-height: 50vh;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-content.maximized .scroll-part {
+            max-height: calc(100vh - 150px);
         }
 
         .form-group {
@@ -498,7 +523,6 @@
             border-radius: 4px;
             box-sizing: border-box;
             cursor: pointer;
-
         }
 
         select:focus {
@@ -522,6 +546,12 @@
             padding: 8px 15px;
             border-radius: 4px;
             cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .btn-cancel {
@@ -587,20 +617,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr data-id="1">
-                        <td></td>
-                        <td>John Doe</td>
-                        <td>True</td>
-                        <td>1985-05-15</td>
-                        <td>USA</td>
-                    </tr>
-                    <tr data-id="2">
-                        <td></td>
-                        <td>Jane Smith</td>
-                        <td>False</td>
-                        <td>1990-11-22</td>
-                        <td>Canada</td>
-                    </tr>
+                  
                 </tbody>
             </table>
         </div>
@@ -657,7 +674,7 @@
             <div class="modal-header">
                 <div class="modal-title">Edit Person</div>
                 <div class="modal-controls">
-                    <div class="modal-control" id="maximizeModal">◻</div>
+                    <div class="modal-control" id="maximizeModal">🗖</div>
                     <div class="modal-control" id="closeModal">✕</div>
                 </div>
             </div>
@@ -774,289 +791,6 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Column resizing functionality
-            const createResizableTableHead = () => {
-                const table = document.querySelector('table');
-                const headers = table.querySelectorAll('th:not(:first-child)');
-
-                headers.forEach(header => {
-                    const handle = document.createElement('div');
-                    handle.className = 'resize-handle';
-                    header.appendChild(handle);
-
-                    let isResizing = false;
-                    let startX;
-                    let startWidth;
-
-                    handle.addEventListener('mousedown', (e) => {
-                        isResizing = true;
-                        startX = e.clientX;
-                        startWidth = header.offsetWidth;
-                        document.body.classList.add('dragging');
-
-                        document.addEventListener('mousemove', onMouseMove);
-                        document.addEventListener('mouseup', () => {
-                            isResizing = false;
-                            document.body.classList.remove('dragging');
-                            document.removeEventListener('mousemove', onMouseMove);
-                        }, { once: true });
-                    });
-
-                    function onMouseMove(e) {
-                        if (!isResizing) return;
-                        const dx = e.clientX - startX;
-                        header.style.width = `${Math.max(startWidth + dx, 100)}px`;
-                    }
-                });
-            };
-
-            // Create filter menu template
-            const createFilterMenu = () => {
-                return `
-        <div class="filter-menu-header">Show items with value that:</div>
-        <div class="filter-condition">
-          <select class="filter-select">
-            <option>Is equal to</option>
-            <option>Is not equal to</option>
-          </select>
-          <input type="text" class="filter-input">
-          <select class="filter-select logic-operator">
-            <option>And</option>
-            <option>Or</option>
-          </select>
-          <select class="filter-select">
-            <option>Is equal to</option>
-            <option>Is not equal to</option>
-          </select>
-          <input type="text" class="filter-input">
-        </div>
-        <div class="filter-actions">
-          <div class="filter-btn filter-apply">Filter</div>
-          <div class="filter-btn filter-clear">Clear</div>
-        </div>
-      `;
-            };
-
-            // Create nationality filter menu template
-            const createNationalityFilterMenu = () => {
-                return `
-        <div class="filter-menu-header">Show items with value that:</div>
-        <div class="filter-condition">
-          <select class="filter-select">
-            <option>Is equal to</option>
-            <option>Is not equal to</option>
-            <option>Contains</option>
-            <option>Does not contain</option>
-          </select>
-          <input type="text" class="filter-input" placeholder="Enter value" value="Egypt">
-        </div>
-        <div class="filter-add-condition">And</div>
-        <div class="filter-condition">
-          <select class="filter-select">
-            <option>Is equal to</option>
-            <option>Is not equal to</option>
-            <option>Contains</option>
-            <option>Does not contain</option>
-          </select>
-          <input type="text" class="filter-input" placeholder="Enter value">
-        </div>
-        <div class="filter-actions">
-          <div class="filter-btn filter-apply">Apply</div>
-          <div class="filter-btn filter-clear">Clear</div>
-        </div>
-      `;
-            };
-
-            // Create sort menu template with text buttons
-            const createSortMenu = () => {
-                return `
-          <div class="sort-menu">
-            <div class="sort-btn" data-sort="asc">Add to sort (ascending)</div>
-            <div class="sort-btn" data-sort="desc">Add to sort (descending)</div>
-            <div class="sort-btn" data-sort="custom">Sort (ascending)</div>
-            <div class="sort-btn" data-sort="clear">Sort (descending)</div>
-          </div>
-      `;
-            };
-
-            // Dropdown functionality
-            const dropdown = document.createElement('div');
-            dropdown.className = 'th-dropdown';
-            document.body.appendChild(dropdown);
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function (e) {
-                if (!e.target.closest('.th-dots') && !e.target.closest('.th-dropdown')) {
-                    dropdown.classList.remove('show');
-                }
-            });
-
-            document.querySelectorAll('.th-dots').forEach(button => {
-                button.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    const header = this.parentElement;
-                    const rect = header.getBoundingClientRect();
-                    const headerText = header.textContent.trim();
-
-                    dropdown.innerHTML = `
-          <ul>
-            <li class="has-nested">Filter<span class="arrow">></span>
-              <div class="nested-dropdown">
-                ${headerText === 'Nationality' ? createNationalityFilterMenu() : createFilterMenu()}
-              </div>
-            </li>
-            <li class="has-nested">Sort<span class="arrow">></span>
-              <div class="nested-dropdown">
-                ${createSortMenu()}
-              </div>
-            </li>
-          </ul>
-        `;
-
-                    // Smart positioning
-                    const spaceBelow = window.innerHeight - rect.bottom;
-                    if (spaceBelow > 150) {
-                        dropdown.style.top = `${rect.bottom + window.scrollY + 2}px`;
-                    } else {
-                        dropdown.style.top = `${rect.top + window.scrollY - dropdown.offsetHeight - 2}px`;
-                    }
-                    dropdown.style.left = `${rect.right - 100}px`;
-
-                    // Show dropdown
-                    dropdown.classList.add('show');
-                });
-            });
-
-            // Handle sort button clicks
-            document.addEventListener('click', function (e) {
-                if (e.target.closest('.sort-btn')) {
-                    const sortBtn = e.target.closest('.sort-btn');
-                    const sortType = sortBtn.dataset.sort;
-
-                    // Remove active class from all buttons
-                    document.querySelectorAll('.sort-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-
-                    // Add active class to clicked button (except for clear)
-                    if (sortType !== 'clear') {
-                        sortBtn.classList.add('active');
-                    }
-
-                    // Handle the sort action
-                    switch (sortType) {
-                        case 'asc':
-                            console.log('Sorting A to Z');
-                            // sortTable(columnName, 'asc');
-                            break;
-                        case 'desc':
-                            console.log('Sorting Z to A');
-                            // sortTable(columnName, 'desc');
-                            break;
-                        case 'custom':
-                            console.log('Custom sort');
-                            // showCustomSortDialog();
-                            break;
-                        case 'clear':
-                            console.log('Clearing sort');
-                            // clearSort();
-                            break;
-                    }
-                }
-            });
-
-            // Row selection functionality
-            const tableRows = document.querySelectorAll('tbody tr');
-            const editModal = document.getElementById('editModal');
-            
-            tableRows.forEach(row => {
-                // Single click for selection
-                row.addEventListener('click', function (e) {
-                    // Deselect all other rows
-                    tableRows.forEach(r => {
-                        if (r !== this) {
-                            r.classList.remove('selected');
-                        }
-                    });
-
-                    // Toggle selection for clicked row
-                    this.classList.toggle('selected');
-                });
-                
-                // Double click to open edit modal
-                row.addEventListener('dblclick', function() {
-                    // Select the row first
-                    tableRows.forEach(r => r.classList.remove('selected'));
-                    this.classList.add('selected');
-                    
-                    // Open the edit modal
-                    editModal.style.display = 'flex';
-                    
-                    // Here you would populate the modal with the selected row's data
-                    // For now we're just showing the modal with dummy data
-                });
-            });
-
-            // Edit functionality
-            const editIcon = document.getElementById('edit-icon');
-            const cancelEdit = document.getElementById('cancelEdit');
-            const saveEdit = document.getElementById('saveEdit');
-            const closeModal = document.getElementById('closeModal');
-            const maximizeModal = document.getElementById('maximizeModal');
-            const modalContent = document.getElementById('modalContent');
-
-            editIcon.addEventListener('click', function () {
-                const selectedRow = document.querySelector('tr.selected');
-                if (!selectedRow) {
-                    alert('Please select a row to edit');
-                    return;
-                }
-
-                // Here you would populate the modal with the selected row's data
-                // For now we're just showing the modal with dummy data
-                editModal.style.display = 'flex';
-            });
-
-            cancelEdit.addEventListener('click', function () {
-                editModal.style.display = 'none';
-            });
-
-            saveEdit.addEventListener('click', function () {
-                // Here you would save the edited data
-                alert('Changes saved!');
-                editModal.style.display = 'none';
-            });
-
-            closeModal.addEventListener('click', function () {
-                editModal.style.display = 'none';
-            });
-
-            maximizeModal.addEventListener('click', function () {
-                if (modalContent.style.width === '70%') {
-                    modalContent.style.width = '900px';
-                } else {
-                    modalContent.style.width = '70%';
-                }
-            });
-
-            // Close modal when clicking outside
-            window.addEventListener('click', function (e) {
-                if (e.target === editModal) {
-                    editModal.style.display = 'none';
-                }
-            });
-
-            // Initialize features
-            createResizableTableHead();
-        });
-
-        function sortTable(columnName, sortDirection) {
-            console.log(`Sorting ${columnName} ${sortDirection === 'asc' ? 'ascending' : 'descending'}`);
-            // Actual sorting implementation would go here
-        }
-    </script>
 </body>
 
 </html>
